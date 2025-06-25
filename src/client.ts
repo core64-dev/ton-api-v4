@@ -12,12 +12,7 @@ import { fetchConfig } from './utils/fetchConfig';
 export async function createClient() {
 
     // Fetch config
-    if (!process.env.TON_CONFIG) {
-        console.warn('Unable to find TON_CONFIG');
-        return null;
-    }
-    console.log('fetch config from: ', process.env.TON_CONFIG);
-    let config = await fetchConfig(process.env.TON_CONFIG);
+    let config = await fetchConfig();
     if (config.length === 0) {
         console.warn('No lite servers in config');
         return null;

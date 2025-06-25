@@ -6,7 +6,6 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-import axios from "axios";
 import * as t from 'io-ts';
 import { log, warn } from "./log";
 
@@ -19,23 +18,20 @@ function intToIP(int: number) {
     return part4 + "." + part3 + "." + part2 + "." + part1;
 }
 
-const codec = t.type({
-    liteservers: t.array(t.type({
-        ip: t.number,
-        port: t.number,
-        id: t.type({
-            ['@type']: t.literal('pub.ed25519'),
-            key: t.string
-        })
-    }))
-})
+const codec = t.array(t.type({
+    ip: t.number,
+    port: t.number,
+    id: t.type({
+        ['@type']: t.literal('pub.ed25519'),
+        key: t.string
+    })
+}))
 
-export async function fetchConfig(src: string) {
-    log('Fetching "' + src + '"');
-    let config = (await axios.get(src)).data;
+export async function fetchConfig() {
+    let config = JSON.parse(process.env.TON_CONFIG!);
     if (!codec.is(config)) {
         warn(config);
         throw Error('Invalid config');
     }
-    return config.liteservers.map((ls) => ({ ip: intToIP(ls.ip), port: ls.port, key: Buffer.from(ls.id.key, 'base64') }));
+    return config.map((ls) => ({ ip: intToIP(ls.ip), port: ls.port, key: Buffer.from(ls.id.key, 'base64') }));
 }
